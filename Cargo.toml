@@ -27,6 +27,7 @@ eyre = "0.6.8"
 [features]
 export-abi = ["stylus-sdk/export-abi"]
 debug = ["stylus-sdk/debug"]
+default = []
 
 [lib]
 crate-type = ["lib", "cdylib"]
