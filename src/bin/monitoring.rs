@@ -1,10 +1,11 @@
-// src/monitoring.rs
+// src/bin/monitoring.rs
 
 #![cfg(not(target_arch = "wasm32"))]
 
-use ethers::providers::{Http, Provider,Middleware};
+use ethers::providers::{Http, Provider, Middleware};
 use reqwest::Client;
 use serde_json::Value;
+use std::error::Error;
 use std::sync::{Arc, Mutex};
 use tokio::time::{sleep, Duration};
 
@@ -69,7 +70,7 @@ pub async fn fetch_pending_transaction_count(metrics: SharedMetrics) {
     }
 }
 
-pub async fn start_monitoring() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_monitoring() -> Result<(), Box<dyn Error>> {
     // Create an HTTP provider for Arbitrum RPC
     let provider = Provider::<Http>::try_from("http://localhost:8547")?;
 
@@ -90,4 +91,10 @@ pub async fn start_monitoring() -> Result<(), Box<dyn std::error::Error>> {
         // Sleep for a specified period before fetching again (e.g., 10 seconds)
         sleep(Duration::from_secs(10)).await;
     }
+}
+
+// Add a `main` function to start the monitoring process
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    start_monitoring().await
 }
