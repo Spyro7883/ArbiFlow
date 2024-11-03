@@ -1,68 +1,55 @@
-//!
-//! Stylus Hello World
-//!
-//! The following contract implements the Counter example from Foundry.
-//!
-//! ```
-//! contract Counter {
-//!     uint256 public number;
-//!     function setNumber(uint256 newNumber) public {
-//!         number = newNumber;
-//!     }
-//!     function increment() public {
-//!         number++;
-//!     }
-//! }
-//! ```
-//!
-//! The program is ABI-equivalent with Solidity, which means you can call it from both Solidity and Rust.
-//! To do this, run `cargo stylus export-abi`.
-//!
-//! Note: this code is a template-only and has not been audited.
-//!
+// src/lib.rs
 
-// Allow `cargo stylus export-abi` to generate a main function.
-#![cfg_attr(not(feature = "export-abi"), no_main)]
 extern crate alloc;
 
-/// Import items from the SDK. The prelude contains common traits and macros.
-use stylus_sdk::{alloy_primitives::U256, prelude::*};
+use stylus_sdk::{alloy_primitives::U256, prelude::*, console};
 
-// Define some persistent storage using the Solidity ABI.
-// `Counter` will be the entrypoint.
+// Include the monitoring module
+#[cfg(not(target_arch = "wasm32"))]
+pub mod monitoring;
+
+// Define persistent storage using the Solidity ABI.
+// `MonitoringContract` will be the entry point.
 sol_storage! {
     #[entrypoint]
-    pub struct Counter {
-        uint256 number;
+    pub struct MonitoringContract {
+        uint256 transaction_count;  // Track the number of contract interactions
+        uint256 latest_value;       // Track the latest value updated in the contract
     }
 }
 
-/// Declare that `Counter` is a contract with the following external methods.
+/// Declare that `MonitoringContract` is a contract with the following external methods.
 #[public]
-impl Counter {
-    /// Gets the number from storage.
-    pub fn number(&self) -> U256 {
-        self.number.get()
+impl MonitoringContract {
+    /// Gets the transaction count from storage.
+    pub fn get_transaction_count(&self) -> U256 {
+        self.transaction_count.get()
     }
 
-    /// Sets a number in storage to a user-specified value.
-    pub fn set_number(&mut self, new_number: U256) {
-        self.number.set(new_number);
+    /// Gets the latest value from storage.
+    pub fn get_latest_value(&self) -> U256 {
+        self.latest_value.get()
     }
 
-    /// Sets a number in storage to a user-specified value.
-    pub fn mul_number(&mut self, new_number: U256) {
-        self.number.set(new_number * self.number.get());
+    /// Updates the latest value in storage and increments the transaction count.
+    pub fn update_value(&mut self, new_value: U256) {
+        let current_count = self.transaction_count.get();
+        self.transaction_count.set(current_count + U256::from(1));
+        self.latest_value.set(new_value);
+
+        // Emit a log event for monitoring purposes
+        console!("Event: ValueUpdated, Value: {}", new_value);
     }
 
-    /// Sets a number in storage to a user-specified value.
-    pub fn add_number(&mut self, new_number: U256) {
-        self.number.set(new_number + self.number.get());
-    }
-
-    /// Increments `number` and updates its value in storage.
-    pub fn increment(&mut self) {
-        let number = self.number.get();
-        self.set_number(number + U256::from(1));
+    /// Increments the transaction count without changing the value (for monitoring interactions).
+    pub fn increment_transaction_count(&mut self) {
+        let current_count = self.transaction_count.get();
+        self.transaction_count.set(current_count + U256::from(1));
+        console!(
+            "Event: TransactionCountIncremented, Count: {}",
+            current_count + U256::from(1)
+        );
     }
 }
+
+
