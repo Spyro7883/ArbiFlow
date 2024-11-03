@@ -1,7 +1,5 @@
 // src/bin/monitoring.rs
 
-#![cfg(not(target_arch = "wasm32"))]
-
 use ethers::providers::{Http, Provider, Middleware};
 use reqwest::Client;
 use serde_json::Value;
@@ -94,7 +92,7 @@ pub async fn start_monitoring() -> Result<(), Box<dyn Error>> {
 }
 
 // Add a `main` function to start the monitoring process
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    start_monitoring().await
-}
+// #[tokio::main]
+// async fn main() -> Result<(), Box<dyn Error>> {
+//     start_monitoring().await
+// }

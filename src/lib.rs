@@ -1,7 +1,11 @@
 // src/lib.rs
 
-#![no_std]
-extern crate alloc;
+#![cfg_attr(target_arch = "wasm32", no_std)]
+
+extern crate alloc; // Add this line to always include the alloc crate
+
+#[cfg(not(target_arch = "wasm32"))]
+extern crate std;
 
 use stylus_sdk::{
     alloy_primitives::{Address, U256},
@@ -10,6 +14,9 @@ use stylus_sdk::{
 };
 
 use core::convert::TryFrom; // Import TryFrom
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod monitoring;
 
 mod congestion;
 mod transaction;
